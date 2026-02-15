@@ -1,0 +1,21 @@
+SYSTEM: app started
+SYSTEM: You are a helpful assistant. Keep replies short, clear, and friendly.
+YOU: hi evo
+BOT: Hi! How can I help you today?
+
+YOU: can you tell me about ai ttinker
+BOT: You’re likely thinking of **AI Tinkerers**!
+
+It is a global community of technical practitioners—developers, researchers, and hackers—who are actively building with generative AI. 
+
+Key things to know:
+*   **Meetups:** They host local events in cities worldwide where members show live demos of their projects.
+*   **Focus:** It’s strictly for "tinkerers" (people who code and build) rather than just enthusiasts or sales pitches.
+*   **Goal:** To share knowledge, collaborate, and push the boundaries of what’s possible with LLMs and generative tools.
+
+Are you looking to join a local chapter or build something specific?
+
+SYSTEM: memory cleared
+SYSTEM: memory cleared
+SYSTEM: memory cleared
+SYSTEM: new chat

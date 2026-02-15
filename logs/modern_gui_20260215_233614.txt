@@ -1,0 +1,2 @@
+SYSTEM: app started
+SYSTEM: You are a helpful assistant. Keep replies short, clear, and friendly.
