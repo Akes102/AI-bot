@@ -24,14 +24,16 @@ import speech_recognition as sr
 
 APP_TITLE = "Evo v10 Pro"
 SETTINGS_FILE = "evo_settings.json"
-DEFAULT_MODEL = "gemini-2.0-flash"
+DEFAULT_MODEL = "gemini-3-flash-preview"
 
 MODEL_OPTIONS = [
+    "gemini-3-flash-preview",
     "gemini-2.0-flash",
     "gemini-flash-latest",
     "gemini-pro-latest",
     "gemini-2.5-flash",
 ]
+
 
 DEFAULT_ROLE = (
     "You are Evo, a helpful assistant.\n"
