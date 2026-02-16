@@ -1,82 +1,154 @@
-# gemini_v8_gui.py
-# Tkinter GUI chatbot using the NEW Gemini SDK with memory.
-
 import os
-import tkinter as tk
-from tkinter import scrolledtext
+import threading
+from dotenv import load_dotenv
 from google import genai
+import customtkinter as ctk
+from tkinter import filedialog, messagebox
 
-# Block: check API key
+load_dotenv()
+
 api_key = os.getenv("GEMINI_API_KEY")
 if not api_key:
     raise RuntimeError("GEMINI_API_KEY is not set.")
 
-# Block: create client and select model
 client = genai.Client(api_key=api_key)
-MODEL = "models/gemini-flash-latest"
+MODEL = "gemini-2.0-flash"
 
-# Block: create chat session (memory)
 chat = client.chats.create(model=MODEL)
+EVO_ROLE = "You are Evo. Keep replies short, clear, and helpful."
 
-# Block: role instruction (controls bot behavior)
-ROLE = "You are a helpful assistant. Keep replies short and clear."
+ctk.set_appearance_mode("dark")
+ctk.set_default_color_theme("blue")
 
-def reset_chat():
-    # Block: recreate chat object to clear memory
+app = ctk.CTk()
+app.title("Evo Modern GUI v9")
+app.geometry("1000x650")
+app.grid_columnconfigure(0, weight=0)
+app.grid_columnconfigure(1, weight=1)
+app.grid_rowconfigure(0, weight=1)
+
+status_var = ctk.StringVar(value="Ready")
+
+sidebar = ctk.CTkFrame(app, width=260, corner_radius=0)
+sidebar.grid(row=0, column=0, sticky="nsw")
+sidebar.grid_rowconfigure(10, weight=1)
+
+main = ctk.CTkFrame(app, corner_radius=0)
+main.grid(row=0, column=1, sticky="nsew")
+main.grid_rowconfigure(0, weight=1)
+main.grid_columnconfigure(0, weight=1)
+
+ctk.CTkLabel(sidebar, text="Evo Controls", font=("Segoe UI", 16, "bold")).grid(
+    row=0, column=0, padx=16, pady=(16, 6), sticky="w"
+)
+
+ctk.CTkLabel(sidebar, textvariable=status_var, font=("Segoe UI", 12)).grid(
+    row=1, column=0, padx=16, pady=(0, 12), sticky="w"
+)
+
+role_box = ctk.CTkTextbox(sidebar, height=140, font=("Segoe UI", 11))
+role_box.grid(row=2, column=0, padx=16, pady=(0, 8), sticky="we")
+role_box.insert("1.0", EVO_ROLE)
+
+chat_scroll = ctk.CTkScrollableFrame(main, corner_radius=0)
+chat_scroll.grid(row=0, column=0, sticky="nsew")
+
+chat_lines = []
+
+def add_line(sender: str, text: str):
+    chat_lines.append((sender, text))
+    label = ctk.CTkLabel(
+        chat_scroll,
+        text=f"{sender}: {text}",
+        wraplength=650,
+        justify="left",
+        anchor="w"
+    )
+    label.pack(anchor="w", padx=12, pady=6)
+
+def reset_memory():
     global chat
     chat = client.chats.create(model=MODEL)
 
+def clear_view():
+    chat_lines.clear()
+    for w in chat_scroll.winfo_children():
+        w.destroy()
+
+def save_chat():
+    if not chat_lines:
+        messagebox.showinfo("Save", "Nothing to save.")
+        return
+
+    path = filedialog.asksaveasfilename(
+        defaultextension=".txt",
+        filetypes=[("Text files", "*.txt")]
+    )
+    if not path:
+        return
+
+    with open(path, "w", encoding="utf-8") as f:
+        for s, t in chat_lines:
+            f.write(f"{s}: {t}\n")
+
+    messagebox.showinfo("Save", f"Saved to:\n{path}")
+
+def apply_role():
+    global EVO_ROLE
+    EVO_ROLE = role_box.get("1.0", "end").strip()
+    reset_memory()
+    add_line("System", "Evo role updated. Memory reset.")
+
+ctk.CTkButton(sidebar, text="Apply Role (reset)", command=apply_role).grid(
+    row=3, column=0, padx=16, pady=(0, 8), sticky="we"
+)
+
+ctk.CTkButton(sidebar, text="Clear Memory", command=lambda: (reset_memory(), add_line("System", "Memory cleared."))).grid(
+    row=4, column=0, padx=16, pady=(0, 8), sticky="we"
+)
+
+ctk.CTkButton(sidebar, text="New Chat", command=lambda: (reset_memory(), clear_view(), add_line("System", "New chat started."))).grid(
+    row=5, column=0, padx=16, pady=(0, 8), sticky="we"
+)
+
+ctk.CTkButton(sidebar, text="Save Chat", command=save_chat).grid(
+    row=6, column=0, padx=16, pady=(0, 8), sticky="we"
+)
+
+input_bar = ctk.CTkFrame(main, corner_radius=0)
+input_bar.grid(row=1, column=0, sticky="ew")
+input_bar.grid_columnconfigure(0, weight=1)
+
+entry = ctk.CTkEntry(input_bar, placeholder_text="Type a message to Evo...")
+entry.grid(row=0, column=0, padx=12, pady=12, sticky="ew")
+
 def send_message():
-    # Block: get user input
     user_text = entry.get().strip()
     if not user_text:
         return
 
-    # Block: clear command
-    if user_text.lower() == "/clear":
-        reset_chat()
-        chat_box.delete("1.0", tk.END)
-        chat_box.insert(tk.END, "Memory cleared.\n\n")
-        entry.delete(0, tk.END)
-        return
+    entry.delete(0, "end")
+    add_line("You", user_text)
+    status_var.set("Thinking...")
 
-    # Block: show user message in UI
-    chat_box.insert(tk.END, f"You: {user_text}\n")
-    entry.delete(0, tk.END)
+    def worker():
+        try:
+            prompt = f"ROLE:\n{EVO_ROLE}\n\nUSER:\n{user_text}"
+            resp = chat.send_message(prompt)
+            reply = resp.text.strip() if resp.text else "(no response)"
+        except Exception as e:
+            reply = f"Error: {e}"
 
-    # Block: add role instruction
-    prompt = f"ROLE:\n{ROLE}\n\nUSER:\n{user_text}"
+        app.after(0, lambda: add_line("Evo", reply))
+        app.after(0, lambda: status_var.set("Ready"))
 
-    # Block: call Gemini with error handling
-    try:
-        resp = chat.send_message(prompt)
-        reply = resp.text
-    except Exception:
-        reply = "Error: request failed. Check your key or internet."
+    threading.Thread(target=worker, daemon=True).start()
 
-    # Block: show reply
-    chat_box.insert(tk.END, f"Bot: {reply}\n\n")
-    chat_box.see(tk.END)
+ctk.CTkButton(input_bar, text="Send", width=110, command=send_message).grid(
+    row=0, column=1, padx=(0, 12), pady=12
+)
 
-def on_enter(event):
-    # Block: Enter key sends message
-    send_message()
+entry.bind("<Return>", lambda e: send_message())
 
-# Block: build UI window
-root = tk.Tk()
-root.title("Evo assastant v8")
-
-chat_box = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=70, height=20)
-chat_box.pack(padx=10, pady=10)
-
-entry = tk.Entry(root, width=70)
-entry.pack(padx=10, pady=(0, 10))
-entry.bind("<Return>", on_enter)
-
-btn = tk.Button(root, text="Send", command=send_message)
-btn.pack(pady=(0, 10))
-
-chat_box.insert(tk.END, "EVO GUI Bot v8 running.\nType /clear to reset memory.\n\n")
-
-# Block: start GUI loop
-root.mainloop()
+add_line("System", "Evo Modern GUI v9 running.")
+app.mainloop()
