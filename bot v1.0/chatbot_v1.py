@@ -1,3 +1,16 @@
+""" 
+EVO
+
+A basic AI chatbot that accepts user input, sends it to the OpenAI API, and returns responses while keeping conversation memory during a single session.
+
+Concepts used: API calls, loops, conditionals, lists, environment variables.
+
+"""
+
+
+from dotenv import load_dotenv
+load_dotenv()
+
 from openai import OpenAI
 import os
 
