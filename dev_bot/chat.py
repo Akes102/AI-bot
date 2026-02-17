@@ -37,8 +37,10 @@ if not api_key:
 # Create OpenAI client
 client = OpenAI(api_key=api_key)
 
+#promt here
 prompt = "Explain OpenAI API in simple terms"
 
+#get response
 response = client.responses.create(
     model="gpt-4.1-mini",
     input=prompt

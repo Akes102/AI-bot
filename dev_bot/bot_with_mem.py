@@ -9,12 +9,12 @@ if not api_key:
     raise RuntimeError("GEMINI_API_KEY is not set.")
 
 client = genai.Client(api_key=api_key)
-MODEL = "models/gemini-flash-latest"
+MODEL = "gemini-3-flash-preview"
 
-# Block: start a chat session (keeps history for memory)
+#  start a chat session (keeps history for memory)
 chat = client.chats.create(model=MODEL)
 
-print("Evo v2 (new SDK + memory). Type 'exit' to quit.\n")
+print("Evo v2 (with memory). Type 'exit' to quit.\n")
 
 while True:
     user_text = input("You: ").strip()
@@ -27,7 +27,7 @@ while True:
         print("Type something...")
         continue
 
-    # Block: send a message to the chat session
+    #  send a message to the chat session
     response = chat.send_message(user_text)
 
     print("Evo:", response.text)

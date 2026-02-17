@@ -1,33 +1,38 @@
+
+
 import os
 from dotenv import load_dotenv
-load_dotenv()
 from google import genai
 
+load_dotenv()
 
-api_key =os.getenv("GEMINI_API_KEY")
-
+api_key = os.getenv("GEMINI_API_KEY")
 if not api_key:
-    raise ValueError("Invalid API key")
+    raise ValueError("GEMINI_API_KEY not found in .env")
 
-client=genai.client(api_key=api_key)
+client = genai.Client(api_key=api_key)
 
-prompt=""
-
+prompt = "Explain Gemini API in simple terms"
 
 resp = client.models.generate_content(
-    model="gemini-2.0-flash",
+    model="gemini-3-flash-preview",
     contents=prompt
 )
 
 print(resp.text)
 
+
+
+
+
+"""
 import time
 from google.api_core.exceptions import ResourceExhausted
 
 for attempt in range(5):
     try:
         resp = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-3-flash-preview",
             contents=prompt
         )
         print(resp.text)
@@ -36,3 +41,4 @@ for attempt in range(5):
         wait = 5 * (attempt + 1)
         print(f"Rate limited. Waiting {wait}s...")
         time.sleep(wait)
+"""
