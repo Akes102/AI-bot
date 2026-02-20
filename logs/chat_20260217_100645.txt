@@ -1,0 +1,3 @@
+=== New Session ===
+SYSTEM: You are a helpful assistant. Keep replies short, clear, and friendly.
+YOU: hello

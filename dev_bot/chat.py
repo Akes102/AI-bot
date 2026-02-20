@@ -38,7 +38,7 @@ if not api_key:
 client = OpenAI(api_key=api_key)
 
 #promt here
-prompt = "Explain OpenAI API in simple terms"
+prompt = "explain promt engineering"
 
 #get response
 response = client.responses.create(
@@ -47,3 +47,5 @@ response = client.responses.create(
 )
 
 print(response.output_text)
+
+

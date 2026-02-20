@@ -59,7 +59,7 @@ while True:
     messages.append({"role": "user", "content": user_text})
 
     resp = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-4.1-mini",
         messages=messages
     )
     reply = resp.choices[0].message.content

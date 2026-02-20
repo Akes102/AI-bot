@@ -99,7 +99,7 @@ while True:
     log_line("YOU: " + user_text)
     messages.append({"role": "user", "content": user_text})
 
-    resp = client.chat.completions.create(model="gpt-4o-mini", messages=messages)
+    resp = client.chat.completions.create(model="gpt-4.1-mini", messages=messages)
     reply = resp.choices[0].message.content
 
     print("AI:", reply)
